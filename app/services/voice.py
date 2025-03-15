@@ -1037,7 +1037,13 @@ def is_azure_v2_voice(voice_name: str):
 def tts(
     text: str, voice_name: str, voice_rate: float, voice_pitch: float, voice_file: str
 ) -> [SubMaker, None]:
-    if is_azure_v2_voice(voice_name):
+    if config.app.get("tts_provider", "azure") == 'hailuoai_api':
+        from app.services import voice_hailuoai_api
+        return voice_hailuoai_api.t2a_v2_tts(text, voice_name, voice_rate, voice_pitch, voice_file)
+    elif config.app.get("tts_provider", "azure") == 'hailuoai_ws':
+        from app.services import voice_hailuoai_ws
+        return voice_hailuoai_ws.t2a_v2_tts(text, voice_name, voice_rate, voice_pitch, voice_file)
+    elif is_azure_v2_voice(voice_name):
         return azure_tts_v2(text, voice_name, voice_file)
     return azure_tts_v1(text, voice_name, voice_rate, voice_pitch, voice_file)
 

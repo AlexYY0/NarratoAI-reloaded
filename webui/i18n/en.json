@@ -3,6 +3,7 @@
   "Translation": {
     "Video Script Configuration": "**Video Script Configuration**",
     "Video Script Generate": "Generate Video Script",
+    "Video Highlight Generate": "Generate Highlight Script",
     "Video Subject": "Video Subject (Given a keyword, :red[AI auto-generates] video script)",
     "Script Language": "Language of the generated video script (Usually, AI automatically outputs according to the language of the input subject)",
     "Script Files": "Script Files",

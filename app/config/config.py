@@ -44,6 +44,7 @@ app = _cfg.get("app", {})
 whisper = _cfg.get("whisper", {})
 proxy = _cfg.get("proxy", {})
 azure = _cfg.get("azure", {})
+hailuoai = _cfg.get("hailuoai", {})
 ui = _cfg.get("ui", {})
 frames = _cfg.get("frames", {})
 

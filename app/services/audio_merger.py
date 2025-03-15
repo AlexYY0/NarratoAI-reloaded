@@ -40,7 +40,9 @@ def merge_audio_files(task_id: str, audio_files: list, total_duration: float, li
     final_audio = AudioSegment.silent(duration=total_duration * 1000)  # 总时长以毫秒为单位
 
     # 遍历脚本中的每个片段
-    for segment, audio_file in zip(list_script, audio_files):
+    audio_file_index = 0
+    for segment in list_script:
+        audio_file = audio_files[audio_file_index]
         try:
             # 加载TTS音频文件
             tts_audio = AudioSegment.from_file(audio_file)
@@ -54,6 +56,7 @@ def merge_audio_files(task_id: str, audio_files: list, total_duration: float, li
             if segment['OST'] == 0:
                 # 只使用TTS音频
                 final_audio = final_audio.overlay(tts_audio, position=start_seconds * 1000)
+                audio_file_index += 1
             elif segment['OST'] == 1:
                 # 只使用原声（假设原声已经在视频中）
                 continue
@@ -62,10 +65,38 @@ def merge_audio_files(task_id: str, audio_files: list, total_duration: float, li
                 original_audio = AudioSegment.silent(duration=(end_seconds - start_seconds) * 1000)
                 mixed_audio = original_audio.overlay(tts_audio)
                 final_audio = final_audio.overlay(mixed_audio, position=start_seconds * 1000)
+                audio_file_index += 1
 
         except Exception as e:
             logger.error(f"处理音频文件 {audio_file} 时出错: {str(e)}")
             continue
+
+    # for segment, audio_file in zip(list_script, audio_files):
+    #     try:
+    #         # 加载TTS音频文件
+    #         tts_audio = AudioSegment.from_file(audio_file)
+    #
+    #         # 获取片段的开始和结束时间
+    #         start_time, end_time = segment['new_timestamp'].split('-')
+    #         start_seconds = utils.time_to_seconds(start_time)
+    #         end_seconds = utils.time_to_seconds(end_time)
+    #
+    #         # 根据OST设置处理音频
+    #         if segment['OST'] == 0:
+    #             # 只使用TTS音频
+    #             final_audio = final_audio.overlay(tts_audio, position=start_seconds * 1000)
+    #         elif segment['OST'] == 1:
+    #             # 只使用原声（假设原声已经在视频中）
+    #             continue
+    #         elif segment['OST'] == 2:
+    #             # 混合TTS音频和原声
+    #             original_audio = AudioSegment.silent(duration=(end_seconds - start_seconds) * 1000)
+    #             mixed_audio = original_audio.overlay(tts_audio)
+    #             final_audio = final_audio.overlay(mixed_audio, position=start_seconds * 1000)
+    #
+    #     except Exception as e:
+    #         logger.error(f"处理音频文件 {audio_file} 时出错: {str(e)}")
+    #         continue
 
     # 保存合并后的音频文件
     output_audio_path = os.path.join(utils.task_dir(task_id), "final_audio.mp3")

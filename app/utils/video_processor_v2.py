@@ -291,6 +291,7 @@ class VideoProcessor:
             if original_width > original_height:
                 # 横版视频
                 scale_filter = f'scale={compressed_width}:-1'
+                # scale_filter = f'scale={compressed_width}:180'
             else:
                 # 竖版视频
                 scale_filter = f'scale=-1:{compressed_width}'

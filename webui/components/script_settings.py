@@ -10,6 +10,7 @@ from app.config import config
 from app.models.schema import VideoClipParams
 from app.utils import utils, check_script
 from webui.tools.generate_script_docu import generate_script_docu
+from webui.tools.generate_script_highlight import generate_script_highlight
 from webui.tools.generate_script_short import generate_script_short
 
 
@@ -38,6 +39,7 @@ def render_script_file(tr, params):
         (tr("None"), ""), 
         (tr("Auto Generate"), "auto"), 
         (tr("Short Generate"), "short"),
+        (tr("Highlight Generate"), "highlight"),
         (tr("Upload Script"), "upload_script")  # 新增上传脚本选项
     ]
 
@@ -222,6 +224,8 @@ def render_script_buttons(tr, params):
         button_name = tr("Generate Video Script")
     elif script_path == "short":
         button_name = tr("Generate Short Video Script")
+    elif script_path == "highlight":
+        button_name = tr("Generate Highlight Video Script")
     elif script_path.endswith("json"):
         button_name = tr("Load Video Script")
     else:
@@ -232,6 +236,8 @@ def render_script_buttons(tr, params):
             generate_script_docu(tr, params)
         elif script_path == "short":
             generate_script_short(tr, params)
+        elif script_path == "highlight":
+            generate_script_highlight(tr, params)
         else:
             load_script(tr, script_path)
 

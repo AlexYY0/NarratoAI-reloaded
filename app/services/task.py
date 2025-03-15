@@ -338,6 +338,8 @@ def start_subclip(task_id: str, params: VideoClipParams, subclip_path_videos: di
         'narration': params.tts_volume or params.voice_volume,  # 解说音量100%
     }
     font_path = utils.font_dir(params.font_name)
+    if os.name == "nt":
+        font_path = font_path.replace("\\", "/")
     video.generate_video_v3(
         video_path=combined_video_path,
         subtitle_path=subtitle_path,

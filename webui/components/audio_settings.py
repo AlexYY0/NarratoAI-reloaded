@@ -22,16 +22,31 @@ def render_audio_panel(tr):
 def render_tts_settings(tr):
     """渲染TTS(文本转语音)设置"""
     # 获取支持的语音列表
-    support_locales = ["zh-CN", "en-US"]
-    voices = voice.get_all_azure_voices(filter_locals=support_locales)
+    if config.app.get("tts_provider", "azure") == "azure":
+        support_locales = ["zh-CN", "en-US"]
+        voices = voice.get_all_azure_voices(filter_locals=support_locales)
 
-    # 创建友好的显示名称
-    friendly_names = {
-        v: v.replace("Female", tr("Female"))
-        .replace("Male", tr("Male"))
-        .replace("Neural", "")
-        for v in voices
-    }
+        # 创建友好的显示名称
+        friendly_names = {
+            v: v.replace("Female", tr("Female"))
+            .replace("Male", tr("Male"))
+            .replace("Neural", "")
+            for v in voices
+        }
+    elif config.app.get("tts_provider", "azure") == "hailuoai_api":
+        from app.services import voice_hailuoai_api
+        voices = voice_hailuoai_api.get_all_hailuoai_voices()
+        friendly_names = {
+            v.split(":")[1].strip(): v.split(":")[0].strip()
+            for v in voices
+        }
+    elif config.app.get("tts_provider", "azure") == "hailuoai_ws":
+        from app.services import voice_hailuoai_ws
+        voices = voice_hailuoai_ws.get_all_hailuoai_voices()
+        friendly_names = {
+            v.split(":")[1].strip(): v.split(":")[0].strip()
+            for v in voices
+        }
 
     # 获取保存的语音设置
     saved_voice_name = config.ui.get("voice_name", "")

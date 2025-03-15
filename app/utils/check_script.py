@@ -48,7 +48,7 @@ def check_format(script_content: str) -> Dict[str, Any]:
                 }
             
             # 检查字段内容不能为空
-            if not clip['narration'].strip():
+            if not clip['narration'].strip() and (clip['OST'] == 0 or clip['OST'] == 2):
                 return {
                     'success': False,
                     'message': f'第{i+1}个片段的narration不能为空'
