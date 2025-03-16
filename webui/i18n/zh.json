@@ -189,11 +189,12 @@
     "Subtitle Content": "字幕内容",
     "Merge Result Preview": "合并结果预览",
     "Short Generate": "短剧混剪 (高燃剪辑)",
-    "Highlight Generate": "主要高亮事件解说",
     "Generate Short Video Script": "AI生成短剧混剪脚本",
-    "Generate Highlight Video Script": "AI生成主要高亮事件脚本",
     "Adjust the volume of the original audio": "调整原始音频的音量",
     "Original Volume": "视频音量",
-    "Auto Generate": "纪录片解说 (画面解说)"
+    "Auto Generate": "纪录片解说 (画面解说)",
+    "Highlight Generate": "主要高亮事件解说",
+    "Multifile Generate": "多文件解说",
+    "Generate Highlight Video Script": "AI生成主要高亮事件脚本"
   }
 }

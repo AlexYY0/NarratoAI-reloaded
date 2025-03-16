@@ -40,6 +40,7 @@ def render_script_file(tr, params):
         (tr("Auto Generate"), "auto"), 
         (tr("Short Generate"), "short"),
         (tr("Highlight Generate"), "highlight"),
+        (tr("Multifile Generate"), "multifile"),
         (tr("Upload Script"), "upload_script")  # 新增上传脚本选项
     ]
 
@@ -123,7 +124,15 @@ def render_script_file(tr, params):
 
 def render_video_file(tr, params):
     """渲染视频文件选择"""
-    video_list = [(tr("None"), ""), (tr("Upload Local Files"), "upload_local")]
+    video_list = [
+        (tr("None"), ""),
+        (tr("Upload Local Files"), "upload_local"),
+        (tr("Pexels"), "pexels"),
+        (tr("Pixabay"), "pixabay"),
+        (tr("TikTok"), "douyin"),
+        (tr("Bilibili"), "bilibili"),
+        (tr("Xiaohongshu"), "xiaohongshu"),
+    ]
 
     # 获取已有视频文件
     for suffix in ["*.mp4", "*.mov", "*.avi", "*.mkv"]:
@@ -132,40 +141,82 @@ def render_video_file(tr, params):
             display_name = file.replace(config.root_dir, "")
             video_list.append((display_name, file))
 
-    selected_video_index = st.selectbox(
-        tr("Video File"),
-        index=0,
-        options=range(len(video_list)),
-        format_func=lambda x: video_list[x][0]
-    )
-
-    video_path = video_list[selected_video_index][1]
-    st.session_state['video_origin_path'] = video_path
-    params.video_origin_path = video_path
-
-    if video_path == "upload_local":
-        uploaded_file = st.file_uploader(
-            tr("Upload Local Files"),
-            type=["mp4", "mov", "avi", "flv", "mkv"],
-            accept_multiple_files=False,
+    # 判断是多个素材文件还是单个素材文件
+    script_path = st.session_state.get('video_clip_json_path', '')
+    if script_path == "multifile":
+        selected_video_indices = st.multiselect(
+            tr("Video File"),
+            default=[0],
+            options=range(len(video_list)),
+            format_func=lambda x: video_list[x][0]
         )
 
-        if uploaded_file is not None:
-            video_file_path = os.path.join(utils.video_dir(), uploaded_file.name)
-            file_name, file_extension = os.path.splitext(uploaded_file.name)
+        video_paths = [video_list[index][1] for index in selected_video_indices]
+        st.session_state['video_origin_path'] = video_paths
+        params.video_origin_path = video_paths
 
-            if os.path.exists(video_file_path):
-                timestamp = time.strftime("%Y%m%d%H%M%S")
-                file_name_with_timestamp = f"{file_name}_{timestamp}"
-                video_file_path = os.path.join(utils.video_dir(), file_name_with_timestamp + file_extension)
+        if "upload_local" in video_paths:
+            uploaded_files = st.file_uploader(
+                "Upload Local Files",
+                type=["mp4", "mov", "avi", "flv", "mkv", "jpg", "jpeg", "png"],
+                accept_multiple_files=True,
+            )
 
-            with open(video_file_path, "wb") as f:
-                f.write(uploaded_file.read())
-                st.success(tr("File Uploaded Successfully"))
-                st.session_state['video_origin_path'] = video_file_path
-                params.video_origin_path = video_file_path
+            if uploaded_files:
+                video_file_paths = []
+                for uploaded_file in uploaded_files:
+                    video_file_path = os.path.join(utils.video_dir(), uploaded_file.name)
+                    file_name, file_extension = os.path.splitext(uploaded_file.name)
+
+                    if os.path.exists(video_file_path):
+                        timestamp = time.strftime("%Y%m%d%H%M%S")
+                        file_name_with_timestamp = f"{file_name}_{timestamp}"
+                        video_file_path = os.path.join(utils.video_dir(), file_name_with_timestamp + file_extension)
+
+                    with open(video_file_path, "wb") as f:
+                        f.write(uploaded_file.read())
+                        st.success(tr("File Uploaded Successfully"))
+                        video_file_paths.append(video_file_path)
+                st.session_state['video_origin_path'] = video_file_paths
+                params.video_origin_path = video_file_paths
                 time.sleep(1)
                 st.rerun()
+
+    else:
+        selected_video_index = st.selectbox(
+            tr("Video File"),
+            index=0,
+            options=range(len(video_list)),
+            format_func=lambda x: video_list[x][0]
+        )
+
+        video_path = video_list[selected_video_index][1]
+        st.session_state['video_origin_path'] = video_path
+        params.video_origin_path = video_path
+
+        if video_path == "upload_local":
+            uploaded_file = st.file_uploader(
+                tr("Upload Local Files"),
+                type=["mp4", "mov", "avi", "flv", "mkv"],
+                accept_multiple_files=False,
+            )
+
+            if uploaded_file is not None:
+                video_file_path = os.path.join(utils.video_dir(), uploaded_file.name)
+                file_name, file_extension = os.path.splitext(uploaded_file.name)
+
+                if os.path.exists(video_file_path):
+                    timestamp = time.strftime("%Y%m%d%H%M%S")
+                    file_name_with_timestamp = f"{file_name}_{timestamp}"
+                    video_file_path = os.path.join(utils.video_dir(), file_name_with_timestamp + file_extension)
+
+                with open(video_file_path, "wb") as f:
+                    f.write(uploaded_file.read())
+                    st.success(tr("File Uploaded Successfully"))
+                    st.session_state['video_origin_path'] = video_file_path
+                    params.video_origin_path = video_file_path
+                    time.sleep(1)
+                    st.rerun()
 
 
 def render_video_details(tr):
