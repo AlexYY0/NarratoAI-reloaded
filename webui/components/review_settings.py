@@ -33,17 +33,19 @@ def render_video_item(tr, video_list, subclip_videos, index):
     video_script = video_list[index]
 
     # 显示时间戳
+    sort = video_script.get('sort', '0')
     timestamp = video_script.get('timestamp', '')
+    key = sort + '|' + timestamp
     st.text_area(
         tr("Timestamp"),
-        value=timestamp,
+        value=key,
         height=70,
         disabled=True,
         key=f"timestamp_{index}"
     )
 
     # 显示视频播放器
-    video_path = subclip_videos.get(timestamp)
+    video_path = subclip_videos.get(key)
     if video_path and os.path.exists(video_path):
         try:
             st.video(video_path)

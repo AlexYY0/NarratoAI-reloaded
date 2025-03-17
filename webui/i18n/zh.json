@@ -195,6 +195,12 @@
     "Auto Generate": "纪录片解说 (画面解说)",
     "Highlight Generate": "主要高亮事件解说",
     "Multifile Generate": "多文件解说",
-    "Generate Highlight Video Script": "AI生成主要高亮事件脚本"
+    "Generate Highlight Video Script": "AI生成主要高亮事件脚本",
+    "Video Transition Mode": "视频转场模式",
+    "Shuffle": "随机转场",
+    "FadeIn": "渐入",
+    "FadeOut": "渐出",
+    "SlideIn": "滑动入",
+    "SlideOut": "滑动出"
   }
 }

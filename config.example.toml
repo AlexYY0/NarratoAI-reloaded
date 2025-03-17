@@ -1,5 +1,21 @@
 [app]
     project_version="0.5.2"
+
+    video_source = "pexels"  # "pexels" or "pixabay"
+    # Pexels API Key
+    # Register at https://www.pexels.com/api/ to get your API key.
+    # You can use multiple keys to avoid rate limits.
+    # For example: pexels_api_keys = ["123adsf4567adf89","abd1321cd13efgfdfhi"]
+    # 特别注意格式，Key 用英文双引号括起来，多个Key用逗号隔开
+    pexels_api_keys = []
+
+    # Pixabay API Key
+    # Register at https://pixabay.com/api/docs/ to get your API key.
+    # You can use multiple keys to avoid rate limits.
+    # For example: pixabay_api_keys = ["123adsf4567adf89","abd1321cd13efgfdfhi"]
+    # 特别注意格式，Key 用英文双引号括起来，多个Key用逗号隔开
+    pixabay_api_keys = []
+
     # 支持视频理解的大模型提供商
     #   gemini
     #   NarratoAPI
@@ -139,6 +155,12 @@
     # webui界面是否显示配置项
     hide_config = false
 
+    # 使用哪种TTS服务
+    # azure
+    # hailuoai_api
+    # hailuoai_ws
+    tts_provider = "hailuoai_ws"
+
 
 [whisper]
     # Only effective when subtitle_provider is "whisper"
@@ -169,10 +191,19 @@
     https = "http://127.0.0.1:7890"
 
 [azure]
+    # azure需要
     # Azure Speech API Key
     # Get your API key at https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/SpeechServices
     speech_key=""
     speech_region=""
+
+[hailuoai]
+    # hailuoai_api需要
+    group_id = ""
+    api_key = ""
+    # hailuoai_ws需要
+    token = ""
+    device_id = ""
 
 [frames]
     skip_seconds = 0

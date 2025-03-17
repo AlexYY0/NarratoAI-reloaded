@@ -91,6 +91,13 @@
     "Multifile Generate": "Multifile Generate",
     "Generate Video Script": "Generate Video Script",
     "Generate Short Video Script": "Generate Short Video Script",
-    "Generate Highlight Video Script": "Generate Highlight Video Script"
+    "Generate Highlight Video Script": "Generate Highlight Video Script",
+    "Video Transition Mode": "Video Transition Mode",
+    "None": "None",
+    "Shuffle": "Shuffle",
+    "FadeIn": "FadeIn",
+    "FadeOut": "FadeOut",
+    "SlideIn": "SlideIn",
+    "SlideOut": "SlideOut"
   }
 }

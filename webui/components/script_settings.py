@@ -142,8 +142,9 @@ def render_video_file(tr, params):
             video_list.append((display_name, file))
 
     # 判断是多个素材文件还是单个素材文件
-    script_path = st.session_state.get('video_clip_json_path', '')
-    if script_path == "multifile":
+    # script_path = st.session_state.get('video_clip_json_path', '')
+    # if script_path == "multifile":
+    if True:  # 暂时先默认多文件
         selected_video_indices = st.multiselect(
             tr("Video File"),
             default=[0],

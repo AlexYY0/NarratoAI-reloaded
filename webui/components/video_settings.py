@@ -1,5 +1,5 @@
 import streamlit as st
-from app.models.schema import VideoClipParams, VideoAspect
+from app.models.schema import VideoClipParams, VideoAspect, VideoConcatMode, VideoTransitionMode
 
 
 def render_video_panel(tr):
@@ -12,6 +12,44 @@ def render_video_panel(tr):
 
 def render_video_config(tr, params):
     """渲染视频配置"""
+    # 视频拼接模式
+    video_concat_modes = [
+        (tr("Sequential"), "sequential"),
+        (tr("Random"), "random"),
+    ]
+    selected_index = st.selectbox(
+        tr("Video Concat Mode"),
+        index=1,
+        options=range(
+            len(video_concat_modes)
+        ),  # Use the index as the internal option value
+        format_func=lambda x: video_concat_modes[x][
+            0
+        ],  # The label is displayed to the user
+    )
+    params.video_concat_mode = VideoConcatMode(
+        video_concat_modes[selected_index][1]
+    )
+    st.session_state['video_concat_mode'] = params.video_concat_mode.value
+    # 视频转场模式
+    video_transition_modes = [
+        (tr("None"), VideoTransitionMode.none.value),
+        (tr("Shuffle"), VideoTransitionMode.shuffle.value),
+        (tr("FadeIn"), VideoTransitionMode.fade_in.value),
+        (tr("FadeOut"), VideoTransitionMode.fade_out.value),
+        (tr("SlideIn"), VideoTransitionMode.slide_in.value),
+        (tr("SlideOut"), VideoTransitionMode.slide_out.value),
+    ]
+    selected_index = st.selectbox(
+        tr("Video Transition Mode"),
+        options=range(len(video_transition_modes)),
+        format_func=lambda x: video_transition_modes[x][0],
+        index=0,
+    )
+    params.video_transition_mode = VideoTransitionMode(
+        video_transition_modes[selected_index][1]
+    )
+    st.session_state['video_transition_mode'] = params.video_transition_mode.value
     # 视频比例
     video_aspect_ratios = [
         (tr("Portrait"), VideoAspect.portrait.value),
@@ -24,6 +62,18 @@ def render_video_config(tr, params):
     )
     params.video_aspect = VideoAspect(video_aspect_ratios[selected_index][1])
     st.session_state['video_aspect'] = params.video_aspect.value
+    # 视频片段最大时长
+    params.video_clip_duration = st.selectbox(
+        tr("Clip Duration"), options=[2, 3, 4, 5, 6, 7, 8, 9, 10], index=1
+    )
+    st.session_state['video_clip_duration'] = params.video_clip_duration
+    # 同时生成视频数量
+    params.video_count = st.selectbox(
+        tr("Number of Videos Generated Simultaneously"),
+        options=[1, 2, 3, 4, 5],
+        index=0,
+    )
+    st.session_state['video_count'] = params.video_count
 
     # 视频画质
     video_qualities = [

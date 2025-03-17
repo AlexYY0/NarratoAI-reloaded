@@ -486,12 +486,14 @@ def cut_video(params, progress_callback=None):
             raise ValueError("视频脚本不能为空")
 
         video_script_list = st.session_state['video_clip_json']
-        time_list = [i['timestamp'] for i in video_script_list]
+        time_list = [i.get('sort', '0') + '|'+ i['timestamp'] for i in video_script_list]
 
         def clip_progress(current, total):
             progress = int((current / total) * 100)
             if progress_callback:
                 progress_callback(progress)
+
+        # todo 获取视频素材：本地 or 网络资源
 
         subclip_videos = material.clip_videos(
             task_id=task_id,
@@ -506,7 +508,7 @@ def cut_video(params, progress_callback=None):
         st.session_state['subclip_videos'] = subclip_videos
         for i, video_script in enumerate(video_script_list):
             try:
-                video_script['path'] = subclip_videos[video_script['timestamp']]
+                video_script['path'] = subclip_videos[video_script.get('sort', '0') + '|'+ video_script['timestamp']]
             except KeyError as err:
                 logger.error(f"裁剪视频失败: {err}")
 

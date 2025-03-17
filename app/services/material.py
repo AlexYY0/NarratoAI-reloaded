@@ -306,11 +306,12 @@ def format_timestamp(seconds: float) -> str:
     return f"{hours:02d}:{minutes:02d}:{whole_seconds:02d},{milliseconds:03d}"
 
 
-def save_clip_video(timestamp: str, origin_video: str, save_dir: str = "") -> dict:
+def save_clip_video(sort: str, timestamp: str, origin_video: str, save_dir: str = "") -> dict:
     """
     保存剪辑后的视频
     
     Args:
+        sort: 需要裁剪的原视频索引
         timestamp: 需要裁剪的时间戳,格式为 'HH:MM:SS,mmm-HH:MM:SS,mmm'
                   例如: '00:00:00,000-00:00:20,100'
         origin_video: 原视频路径
@@ -329,12 +330,12 @@ def save_clip_video(timestamp: str, origin_video: str, save_dir: str = "") -> di
         os.makedirs(save_dir)
 
     # 生成更规范的视频文件名
-    video_id = f"vid-{timestamp.replace(':', '-').replace(',', '_')}"
+    video_id = f"{sort}-vid-{timestamp.replace(':', '-').replace(',', '_')}"
     video_path = os.path.join(save_dir, f"{video_id}.mp4")
 
     if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
         logger.info(f"video already exists: {video_path}")
-        return {timestamp: video_path}
+        return {sort + '|' + timestamp: video_path}
 
     try:
         # 加载视频获取总时长
@@ -384,7 +385,7 @@ def save_clip_video(timestamp: str, origin_video: str, save_dir: str = "") -> di
             if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
                 with VideoFileClip(video_path) as clip:
                     if clip.duration > 0 and clip.fps > 0:
-                        return {timestamp: video_path}
+                        return {sort + '|' + timestamp: video_path}
                     
             raise ValueError("视频文件验证失败")
             
@@ -425,8 +426,9 @@ def clip_videos(task_id: str, timestamp_terms: List[str], origin_video: str, pro
     total_items = len(timestamp_terms)
     for index, item in enumerate(timestamp_terms):
         material_directory = config.app.get("material_directory", "").strip()
+        sort, timestamp = item.split('|')
         try:
-            saved_video_path = save_clip_video(timestamp=item, origin_video=origin_video, save_dir=material_directory)
+            saved_video_path = save_clip_video(sort=sort, timestamp=timestamp, origin_video=origin_video[int(sort)], save_dir=material_directory)
             if saved_video_path:
                 logger.info(f"video saved: {saved_video_path}")
                 video_paths.update(saved_video_path)
