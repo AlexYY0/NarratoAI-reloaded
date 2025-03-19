@@ -203,6 +203,7 @@
     "SlideIn": "滑动入",
     "SlideOut": "滑动出",
     "Expect Video Duration": "期望视频时长/s (与自定义提示词二选一，自定义提示词即是视频文案，该选项是网络资源独有)",
-    "Generate Online File Video Script": "网络文件脚本生成"
+    "Generate Online File Video Script": "网络文件脚本生成",
+    "Video Source": "视频来源"
   }
 }

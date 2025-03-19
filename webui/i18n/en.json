@@ -100,6 +100,7 @@
     "SlideIn": "SlideIn",
     "SlideOut": "SlideOut",
     "Expect Video Duration": "Expect Video Duration",
-    "Generate Online File Video Script": "Generate Online File Video Script"
+    "Generate Online File Video Script": "Generate Online File Video Script",
+    "Video Source": "Video Source"
   }
 }

@@ -1,7 +1,7 @@
 [app]
     project_version="0.5.2"
 
-    video_source = "pexels"  # "pexels" or "pixabay"
+    video_source = "local"  # "pexels" or "pixabay"
     # Pexels API Key
     # Register at https://www.pexels.com/api/ to get your API key.
     # You can use multiple keys to avoid rate limits.

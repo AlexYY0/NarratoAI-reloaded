@@ -124,9 +124,10 @@ def render_script_file(tr, params):
 
 def render_video_file(tr, params):
     """渲染视频文件选择"""
-    video_list = [
-        (tr("None"), ""),
+    # 视频来源
+    video_sources = [
         (tr("Upload Local Files"), "upload_local"),
+        (tr("Local file"), "local"),
         (tr("Pexels"), "pexels"),
         (tr("Pixabay"), "pixabay"),
         (tr("TikTok"), "douyin"),
@@ -134,17 +135,34 @@ def render_video_file(tr, params):
         (tr("Xiaohongshu"), "xiaohongshu"),
     ]
 
-    # 获取已有视频文件
-    for suffix in ["*.mp4", "*.mov", "*.avi", "*.mkv", "*.jpg", "*.jpeg", "*.png", "*.bmp"]:
-        video_files = glob.glob(os.path.join(utils.video_dir(), suffix))
-        for file in video_files:
-            display_name = file.replace(config.root_dir, "")
-            video_list.append((display_name, file))
+    saved_video_source_name = config.app.get("video_source", "local")
+    saved_video_source_index = [v[1] for v in video_sources].index(
+        saved_video_source_name
+    )
 
-    # 判断是多个素材文件还是单个素材文件
-    # script_path = st.session_state.get('video_clip_json_path', '')
-    # if script_path == "multifile":
-    if True:  # 暂时先默认多文件
+    selected_index = st.selectbox(
+        tr("Video Source"),
+        options=range(len(video_sources)),
+        format_func=lambda x: video_sources[x][0],
+        index=saved_video_source_index,
+    )
+    params.video_source = video_sources[selected_index][1]
+    config.app["video_source"] = params.video_source
+
+    if "local" == params.video_source:
+        # 本地文件
+        video_list = [
+            (tr("None"), ""),
+        ]
+
+        # 获取已有视频文件
+        for suffix in ["*.mp4", "*.mov", "*.avi", "*.mkv", "*.jpg", "*.jpeg", "*.png", "*.bmp"]:
+            video_files = glob.glob(os.path.join(utils.video_dir(), suffix))
+            for file in video_files:
+                display_name = file.replace(config.root_dir, "")
+                video_list.append((display_name, file))
+
+        # 暂时先默认多文件
         selected_video_indices = st.multiselect(
             tr("Video File"),
             default=[0],
@@ -153,54 +171,9 @@ def render_video_file(tr, params):
         )
 
         video_paths = [video_list[index][1] for index in selected_video_indices]
-
-        if "pexels" == video_paths[0] or "pixabay" == video_paths[0]:
-            params.video_source = video_paths[0]
-            # 不重置video_origin_path，避免上次的数据丢失
-            params.video_origin_path = st.session_state['video_origin_path']
-            # 添加期望视频长度
-            expect_video_duration = st.number_input(
-                tr("Expect Video Duration"), min_value=0.0, step=0.1, format="%.2f"
-            )
-            st.session_state['expect_video_duration'] = expect_video_duration
-            params.expect_video_duration = expect_video_duration
-            # 视频拼接模式
-            video_concat_modes = [
-                (tr("Sequential"), "sequential"),
-                (tr("Random"), "random"),
-            ]
-            selected_index = st.selectbox(
-                tr("Video Concat Mode"),
-                index=1,
-                options=range(
-                    len(video_concat_modes)
-                ),  # Use the index as the internal option value
-                format_func=lambda x: video_concat_modes[x][
-                    0
-                ],  # The label is displayed to the user
-            )
-            params.video_concat_mode = VideoConcatMode(
-                video_concat_modes[selected_index][1]
-            )
-            st.session_state['video_concat_mode'] = params.video_concat_mode.value
-            # 视频片段最大时长
-            params.video_clip_duration = st.selectbox(
-                tr("Clip Duration"), options=[2, 3, 4, 5, 6, 7, 8, 9, 10], index=1
-            )
-            st.session_state['video_clip_duration'] = params.video_clip_duration
-            # 同时生成视频数量
-            params.video_count = st.selectbox(
-                tr("Number of Videos Generated Simultaneously"),
-                options=[1, 2, 3, 4, 5],
-                index=0,
-            )
-            st.session_state['video_count'] = params.video_count
-        # elif "upload_local" in video_paths:
-        elif "upload_local" == video_paths[0]:
-            params.video_source = video_paths[0]
-            st.session_state['video_origin_path'] = video_paths
-            params.video_origin_path = video_paths
-
+        st.session_state['video_origin_path'] = video_paths
+        params.video_origin_path = video_paths
+    elif "upload_local" == params.video_source:
             uploaded_files = st.file_uploader(
                 "Upload Local Files",
                 type=["mp4", "mov", "avi", "flv", "mkv", "jpg", "jpeg", "png"],
@@ -226,47 +199,81 @@ def render_video_file(tr, params):
                 params.video_origin_path = video_file_paths
                 time.sleep(1)
                 st.rerun()
-        else:
-            params.video_source = 'local'
-            st.session_state['video_origin_path'] = video_paths
-            params.video_origin_path = video_paths
-        st.session_state['video_source'] = params.video_source
-
-    else:
-        selected_video_index = st.selectbox(
-            tr("Video File"),
-            index=0,
-            options=range(len(video_list)),
-            format_func=lambda x: video_list[x][0]
+    elif "pexels" == params.video_source or "pixabay" == params.video_source:
+        # 回填video_origin_path，避免上次的数据丢失
+        params.video_origin_path = st.session_state.get('video_origin_path', '')
+        # 添加期望视频长度
+        expect_video_duration = st.number_input(
+            tr("Expect Video Duration"), min_value=0.0, step=0.1, format="%.2f"
         )
+        st.session_state['expect_video_duration'] = expect_video_duration
+        params.expect_video_duration = expect_video_duration
+        # 视频拼接模式
+        video_concat_modes = [
+            (tr("Sequential"), "sequential"),
+            (tr("Random"), "random"),
+        ]
+        selected_index = st.selectbox(
+            tr("Video Concat Mode"),
+            index=1,
+            options=range(
+                len(video_concat_modes)
+            ),  # Use the index as the internal option value
+            format_func=lambda x: video_concat_modes[x][
+                0
+            ],  # The label is displayed to the user
+        )
+        params.video_concat_mode = VideoConcatMode(
+            video_concat_modes[selected_index][1]
+        )
+        st.session_state['video_concat_mode'] = params.video_concat_mode.value
+        # 视频片段最大时长
+        params.video_clip_duration = st.selectbox(
+            tr("Clip Duration"), options=[2, 3, 4, 5, 6, 7, 8, 9, 10, 9999], index=1
+        )
+        st.session_state['video_clip_duration'] = params.video_clip_duration
+        # 同时生成视频数量
+        params.video_count = st.selectbox(
+            tr("Number of Videos Generated Simultaneously"),
+            options=[1, 2, 3, 4, 5],
+            index=0,
+        )
+        st.session_state['video_count'] = params.video_count
 
-        video_path = video_list[selected_video_index][1]
-        st.session_state['video_origin_path'] = video_path
-        params.video_origin_path = video_path
-
-        if video_path == "upload_local":
-            uploaded_file = st.file_uploader(
-                tr("Upload Local Files"),
-                type=["mp4", "mov", "avi", "flv", "mkv"],
-                accept_multiple_files=False,
-            )
-
-            if uploaded_file is not None:
-                video_file_path = os.path.join(utils.video_dir(), uploaded_file.name)
-                file_name, file_extension = os.path.splitext(uploaded_file.name)
-
-                if os.path.exists(video_file_path):
-                    timestamp = time.strftime("%Y%m%d%H%M%S")
-                    file_name_with_timestamp = f"{file_name}_{timestamp}"
-                    video_file_path = os.path.join(utils.video_dir(), file_name_with_timestamp + file_extension)
-
-                with open(video_file_path, "wb") as f:
-                    f.write(uploaded_file.read())
-                    st.success(tr("File Uploaded Successfully"))
-                    st.session_state['video_origin_path'] = video_file_path
-                    params.video_origin_path = video_file_path
-                    time.sleep(1)
-                    st.rerun()
+    # selected_video_index = st.selectbox(
+    #     tr("Video File"),
+    #     index=0,
+    #     options=range(len(video_list)),
+    #     format_func=lambda x: video_list[x][0]
+    # )
+    #
+    # video_path = video_list[selected_video_index][1]
+    # st.session_state['video_origin_path'] = video_path
+    # params.video_origin_path = video_path
+    #
+    # if video_path == "upload_local":
+    #     uploaded_file = st.file_uploader(
+    #         tr("Upload Local Files"),
+    #         type=["mp4", "mov", "avi", "flv", "mkv"],
+    #         accept_multiple_files=False,
+    #     )
+    #
+    #     if uploaded_file is not None:
+    #         video_file_path = os.path.join(utils.video_dir(), uploaded_file.name)
+    #         file_name, file_extension = os.path.splitext(uploaded_file.name)
+    #
+    #         if os.path.exists(video_file_path):
+    #             timestamp = time.strftime("%Y%m%d%H%M%S")
+    #             file_name_with_timestamp = f"{file_name}_{timestamp}"
+    #             video_file_path = os.path.join(utils.video_dir(), file_name_with_timestamp + file_extension)
+    #
+    #         with open(video_file_path, "wb") as f:
+    #             f.write(uploaded_file.read())
+    #             st.success(tr("File Uploaded Successfully"))
+    #             st.session_state['video_origin_path'] = video_file_path
+    #             params.video_origin_path = video_file_path
+    #             time.sleep(1)
+    #             st.rerun()
 
 
 def render_video_details(tr):
