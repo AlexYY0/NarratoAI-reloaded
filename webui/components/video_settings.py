@@ -12,25 +12,6 @@ def render_video_panel(tr):
 
 def render_video_config(tr, params):
     """渲染视频配置"""
-    # 视频拼接模式
-    video_concat_modes = [
-        (tr("Sequential"), "sequential"),
-        (tr("Random"), "random"),
-    ]
-    selected_index = st.selectbox(
-        tr("Video Concat Mode"),
-        index=1,
-        options=range(
-            len(video_concat_modes)
-        ),  # Use the index as the internal option value
-        format_func=lambda x: video_concat_modes[x][
-            0
-        ],  # The label is displayed to the user
-    )
-    params.video_concat_mode = VideoConcatMode(
-        video_concat_modes[selected_index][1]
-    )
-    st.session_state['video_concat_mode'] = params.video_concat_mode.value
     # 视频转场模式
     video_transition_modes = [
         (tr("None"), VideoTransitionMode.none.value),
@@ -62,18 +43,6 @@ def render_video_config(tr, params):
     )
     params.video_aspect = VideoAspect(video_aspect_ratios[selected_index][1])
     st.session_state['video_aspect'] = params.video_aspect.value
-    # 视频片段最大时长
-    params.video_clip_duration = st.selectbox(
-        tr("Clip Duration"), options=[2, 3, 4, 5, 6, 7, 8, 9, 10], index=1
-    )
-    st.session_state['video_clip_duration'] = params.video_clip_duration
-    # 同时生成视频数量
-    params.video_count = st.selectbox(
-        tr("Number of Videos Generated Simultaneously"),
-        options=[1, 2, 3, 4, 5],
-        index=0,
-    )
-    st.session_state['video_count'] = params.video_count
 
     # 视频画质
     video_qualities = [
@@ -108,5 +77,6 @@ def get_video_params():
     return {
         'video_aspect': st.session_state.get('video_aspect', VideoAspect.portrait.value),
         'video_quality': st.session_state.get('video_quality', '1080p'),
-        'original_volume': st.session_state.get('original_volume', 0.7)
+        'original_volume': st.session_state.get('original_volume', 0.7),
+        'video_transition_mode': st.session_state.get('video_transition_mode', VideoTransitionMode.none.value),
     }

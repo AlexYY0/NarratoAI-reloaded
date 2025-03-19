@@ -88,7 +88,7 @@
     "Upload Local Files": "Upload Local Files",
     "File Uploaded Successfully": "File Uploaded Successfully",
     "Highlight Generate": "Highlight Generate",
-    "Multifile Generate": "Multifile Generate",
+    "Online File Generate": "Online File Generate",
     "Generate Video Script": "Generate Video Script",
     "Generate Short Video Script": "Generate Short Video Script",
     "Generate Highlight Video Script": "Generate Highlight Video Script",
@@ -98,6 +98,8 @@
     "FadeIn": "FadeIn",
     "FadeOut": "FadeOut",
     "SlideIn": "SlideIn",
-    "SlideOut": "SlideOut"
+    "SlideOut": "SlideOut",
+    "Expect Video Duration": "Expect Video Duration",
+    "Generate Online File Video Script": "Generate Online File Video Script"
   }
 }

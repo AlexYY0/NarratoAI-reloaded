@@ -194,13 +194,15 @@
     "Original Volume": "视频音量",
     "Auto Generate": "纪录片解说 (画面解说)",
     "Highlight Generate": "主要高亮事件解说",
-    "Multifile Generate": "多文件解说",
+    "Online File Generate": "网络文件脚本生成",
     "Generate Highlight Video Script": "AI生成主要高亮事件脚本",
     "Video Transition Mode": "视频转场模式",
     "Shuffle": "随机转场",
     "FadeIn": "渐入",
     "FadeOut": "渐出",
     "SlideIn": "滑动入",
-    "SlideOut": "滑动出"
+    "SlideOut": "滑动出",
+    "Expect Video Duration": "期望视频时长/s (与自定义提示词二选一，自定义提示词即是视频文案，该选项是网络资源独有)",
+    "Generate Online File Video Script": "网络文件脚本生成"
   }
 }

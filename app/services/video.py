@@ -15,8 +15,9 @@ from moviepy.editor import (
     CompositeAudioClip
 )
 
-
+from app.models import const
 from app.models.schema import VideoAspect, SubtitlePosition
+from app.utils import utils
 
 
 def wrap_text(text, max_width, font, fontsize=60):
@@ -444,3 +445,52 @@ def generate_video_v3(
     if narration_path:
         narration.close()
 
+def preprocess_video(materials: List[str], clip_duration=4):
+    video_origin_path = []
+    for material in materials:
+        if not material:
+            continue
+
+        ext = utils.parse_extension(material)
+        try:
+            clip = VideoFileClip(material)
+        except Exception:
+            clip = ImageClip(material)
+
+        width = clip.size[0]
+        height = clip.size[1]
+        if width < 480 or height < 480:
+            logger.warning(f"video is too small, width: {width}, height: {height}")
+            continue
+
+        if ext in const.FILE_TYPE_IMAGES:
+            logger.info(f"processing image: {material}")
+            # Create an image clip and set its duration to 3 seconds
+            clip = (
+                ImageClip(material)
+                .with_duration(clip_duration)
+                .with_position("center")
+            )
+            # Apply a zoom effect using the resize method.
+            # A lambda function is used to make the zoom effect dynamic over time.
+            # The zoom effect starts from the original size and gradually scales up to 120%.
+            # t represents the current time, and clip.duration is the total duration of the clip (3 seconds).
+            # Note: 1 represents 100% size, so 1.2 represents 120% size.
+            zoom_clip = clip.resized(
+                lambda t: 1 + (clip_duration * 0.03) * (t / clip.duration)
+            )
+
+            # Optionally, create a composite video clip containing the zoomed clip.
+            # This is useful when you want to add other elements to the video.
+            final_clip = CompositeVideoClip([zoom_clip])
+
+            # Output the video to a file.
+            video_file = f"{material}.mp4"
+            final_clip.write_videofile(video_file, fps=30, logger=None)
+            final_clip.close()
+            del final_clip
+            video_origin_path.append(video_file)
+            logger.success(f"completed: {video_file}")
+        else:
+            video_origin_path.append(material)
+    return video_origin_path

@@ -7,7 +7,7 @@ import streamlit as st
 from loguru import logger
 
 from app.config import config
-from app.models.schema import VideoClipParams
+from app.models.schema import VideoClipParams, VideoConcatMode
 from app.utils import utils, check_script
 from webui.tools.generate_script_docu import generate_script_docu
 from webui.tools.generate_script_highlight import generate_script_highlight
@@ -40,7 +40,7 @@ def render_script_file(tr, params):
         (tr("Auto Generate"), "auto"), 
         (tr("Short Generate"), "short"),
         (tr("Highlight Generate"), "highlight"),
-        (tr("Multifile Generate"), "multifile"),
+        (tr("Online File Generate"), "online_file"),
         (tr("Upload Script"), "upload_script")  # 新增上传脚本选项
     ]
 
@@ -135,7 +135,7 @@ def render_video_file(tr, params):
     ]
 
     # 获取已有视频文件
-    for suffix in ["*.mp4", "*.mov", "*.avi", "*.mkv"]:
+    for suffix in ["*.mp4", "*.mov", "*.avi", "*.mkv", "*.jpg", "*.jpeg", "*.png", "*.bmp"]:
         video_files = glob.glob(os.path.join(utils.video_dir(), suffix))
         for file in video_files:
             display_name = file.replace(config.root_dir, "")
@@ -153,10 +153,54 @@ def render_video_file(tr, params):
         )
 
         video_paths = [video_list[index][1] for index in selected_video_indices]
-        st.session_state['video_origin_path'] = video_paths
-        params.video_origin_path = video_paths
 
-        if "upload_local" in video_paths:
+        if "pexels" == video_paths[0] or "pixabay" == video_paths[0]:
+            params.video_source = video_paths[0]
+            # 不重置video_origin_path，避免上次的数据丢失
+            params.video_origin_path = st.session_state['video_origin_path']
+            # 添加期望视频长度
+            expect_video_duration = st.number_input(
+                tr("Expect Video Duration"), min_value=0.0, step=0.1, format="%.2f"
+            )
+            st.session_state['expect_video_duration'] = expect_video_duration
+            params.expect_video_duration = expect_video_duration
+            # 视频拼接模式
+            video_concat_modes = [
+                (tr("Sequential"), "sequential"),
+                (tr("Random"), "random"),
+            ]
+            selected_index = st.selectbox(
+                tr("Video Concat Mode"),
+                index=1,
+                options=range(
+                    len(video_concat_modes)
+                ),  # Use the index as the internal option value
+                format_func=lambda x: video_concat_modes[x][
+                    0
+                ],  # The label is displayed to the user
+            )
+            params.video_concat_mode = VideoConcatMode(
+                video_concat_modes[selected_index][1]
+            )
+            st.session_state['video_concat_mode'] = params.video_concat_mode.value
+            # 视频片段最大时长
+            params.video_clip_duration = st.selectbox(
+                tr("Clip Duration"), options=[2, 3, 4, 5, 6, 7, 8, 9, 10], index=1
+            )
+            st.session_state['video_clip_duration'] = params.video_clip_duration
+            # 同时生成视频数量
+            params.video_count = st.selectbox(
+                tr("Number of Videos Generated Simultaneously"),
+                options=[1, 2, 3, 4, 5],
+                index=0,
+            )
+            st.session_state['video_count'] = params.video_count
+        # elif "upload_local" in video_paths:
+        elif "upload_local" == video_paths[0]:
+            params.video_source = video_paths[0]
+            st.session_state['video_origin_path'] = video_paths
+            params.video_origin_path = video_paths
+
             uploaded_files = st.file_uploader(
                 "Upload Local Files",
                 type=["mp4", "mov", "avi", "flv", "mkv", "jpg", "jpeg", "png"],
@@ -182,6 +226,11 @@ def render_video_file(tr, params):
                 params.video_origin_path = video_file_paths
                 time.sleep(1)
                 st.rerun()
+        else:
+            params.video_source = 'local'
+            st.session_state['video_origin_path'] = video_paths
+            params.video_origin_path = video_paths
+        st.session_state['video_source'] = params.video_source
 
     else:
         selected_video_index = st.selectbox(
@@ -278,6 +327,8 @@ def render_script_buttons(tr, params):
         button_name = tr("Generate Short Video Script")
     elif script_path == "highlight":
         button_name = tr("Generate Highlight Video Script")
+    elif script_path == "online_file":
+        button_name = tr("Generate Online File Video Script")
     elif script_path.endswith("json"):
         button_name = tr("Load Video Script")
     else:
@@ -290,6 +341,8 @@ def render_script_buttons(tr, params):
             generate_script_short(tr, params)
         elif script_path == "highlight":
             generate_script_highlight(tr, params)
+        elif script_path == "online_file":
+            utils.get_video_materials(params)
         else:
             load_script(tr, script_path)
 
@@ -408,5 +461,10 @@ def get_script_params():
         'video_clip_json_path': st.session_state.get('video_clip_json_path', ''),
         'video_origin_path': st.session_state.get('video_origin_path', ''),
         'video_name': st.session_state.get('video_name', ''),
-        'video_plot': st.session_state.get('video_plot', '')
+        'video_plot': st.session_state.get('video_plot', ''),
+        'video_concat_mode': st.session_state.get('video_concat_mode', VideoConcatMode.random.value),
+        'expect_video_duration': st.session_state.get('expect_video_duration', 60),
+        'video_clip_duration': st.session_state.get('video_clip_duration', 3),
+        'video_count': st.session_state.get('video_count', 1),
+        'video_source': st.session_state.get('video_source', 'local')
     }

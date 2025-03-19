@@ -344,13 +344,15 @@ class VideoClipParams(BaseModel):
     video_clip_json: Optional[list] = Field(default=[], description="LLM 生成的视频剪辑脚本内容")
     video_clip_json_path: Optional[str] = Field(default="", description="LLM 生成的视频剪辑脚本路径")
     video_origin_path: Optional[list] = Field(default=[], description="原视频路径")  # 原为字符串，现改为字符串数组
-    video_aspect: Optional[VideoAspect] = Field(default=VideoAspect.portrait.value, description="视频比例")
+    video_aspect: Optional[VideoAspect] = Field(default=VideoAspect.portrait, description="视频比例")
     video_language: Optional[str] = Field(default="zh-CN", description="视频语言")
+
+    expect_video_duration: Optional[int] = Field(default=60, description="期望视频时长")
 
     video_clip_duration: Optional[int] = Field(default=5, description="视频片段最大时长")
     video_count: Optional[int] = Field(default=1, description="同时生成视频数量")
-    # video_source: Optional[str] = "local"
-    video_concat_mode: Optional[VideoConcatMode] = Field(default=VideoConcatMode.random.value, description="视频拼接模式")
+    video_source: Optional[str] = Field(default="local", description="视频来源")  # local(本地已有)、upload_local(本地上传)、pexels、pixabay
+    video_concat_mode: Optional[VideoConcatMode] = Field(default=VideoConcatMode.random, description="视频拼接模式")
     video_transition_mode: Optional[VideoTransitionMode] = Field(default=None, description="视频转场模式")
 
     voice_name: Optional[str] = Field(default="zh-CN-YunjianNeural", description="语音名称")

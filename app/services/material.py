@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from datetime import datetime
 
 import requests
+import streamlit as st
 from typing import List
 from loguru import logger
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -15,6 +16,17 @@ from app.models.schema import VideoAspect, VideoConcatMode, MaterialInfo
 from app.utils import utils
 
 requested_count = 0
+
+
+def format_timestamp(seconds: float) -> str:
+    """将秒数转换为 HH:MM:SS,mmm 格式"""
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    seconds_remainder = seconds % 60
+    whole_seconds = int(seconds_remainder)
+    milliseconds = int((seconds_remainder - whole_seconds) * 1000)
+
+    return f"{hours:02d}:{minutes:02d}:{whole_seconds:02d},{milliseconds:03d}"
 
 
 def get_api_key(cfg_key: str):
@@ -43,7 +55,10 @@ def search_videos_pexels(
     video_orientation = aspect.name
     video_width, video_height = aspect.to_resolution()
     api_key = get_api_key("pexels_api_keys")
-    headers = {"Authorization": api_key}
+    headers = {
+        "Authorization": api_key,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+    }
     # Build URL
     params = {"query": search_term, "per_page": 20, "orientation": video_orientation}
     query_url = f"https://api.pexels.com/videos/search?{urlencode(params)}"
@@ -129,7 +144,7 @@ def search_videos_pixabay(
             for video_type in video_files:
                 video = video_files[video_type]
                 w = int(video["width"])
-                h = int(video["height"])
+                # h = int(video["height"])
                 if w >= video_width:
                     item = MaterialInfo()
                     item.provider = "pixabay"
@@ -161,11 +176,19 @@ def save_video(video_url: str, save_dir: str = "") -> str:
         logger.info(f"video already exists: {video_path}")
         return video_path
 
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+    }
+
     # if video does not exist, download it
     with open(video_path, "wb") as f:
         f.write(
             requests.get(
-                video_url, proxies=config.proxy, verify=False, timeout=(60, 240)
+                video_url,
+                headers=headers,
+                proxies=config.proxy,
+                verify=False,
+                timeout=(60, 240),
             ).content
         )
 
@@ -180,8 +203,9 @@ def save_video(video_url: str, save_dir: str = "") -> str:
         except Exception as e:
             try:
                 os.remove(video_path)
-            except Exception as e:
-                logger.warning(f"无效的视频文件: {video_path} => {str(e)}")
+            except Exception:
+                pass
+            logger.warning(f"invalid video file: {video_path} => {str(e)}")
     return ""
 
 
@@ -229,6 +253,8 @@ def download_videos(
     if video_contact_mode.value == VideoConcatMode.random.value:
         random.shuffle(valid_video_items)
 
+    src_video_clip_json = []
+    sort = 0
     total_duration = 0.0
     for item in valid_video_items:
         try:
@@ -240,6 +266,25 @@ def download_videos(
                 logger.info(f"video saved: {saved_video_path}")
                 video_paths.append(saved_video_path)
                 seconds = min(max_clip_duration, item.duration)
+
+                # 覆盖重写video_clip_json脚本数据
+                start_time = 0
+                clip_duration = item.duration
+                while start_time < clip_duration:
+                    end_time = min(start_time + max_clip_duration, clip_duration)
+                    src_video_clip_json.append({
+                        "sort": str(sort),
+                        "OST": 1,
+                        "narration": "",
+                        "timestamp": f"{format_timestamp(start_time)}-{format_timestamp(end_time)}",
+                        "picture": "None",
+                        "duration": end_time - start_time
+                    })
+                    start_time = end_time
+                    if video_contact_mode.value == VideoConcatMode.sequential.value:
+                        break
+                sort += 1
+
                 total_duration += seconds
                 if total_duration > audio_duration:
                     logger.info(
@@ -249,6 +294,21 @@ def download_videos(
         except Exception as e:
             logger.error(f"failed to download video: {utils.to_json(item)} => {str(e)}")
     logger.success(f"downloaded {len(video_paths)} videos")
+    # 覆盖重写video_clip_json脚本数据
+    if video_contact_mode.value == VideoConcatMode.random.value:
+        random.shuffle(src_video_clip_json)
+    # 生成真正的video_clip_json
+    video_clip_json = []
+    current_time = 0.0  # 当前时间点（秒，包含毫秒）
+    for j in src_video_clip_json:
+        if current_time >= audio_duration:
+            break
+        duration = j.pop('duration')
+        j['new_timestamp'] = f"{format_timestamp(current_time)}-{format_timestamp(current_time + duration)}"
+        video_clip_json.append(j)
+        # 更新当前时间点
+        current_time += duration
+    st.session_state['video_clip_json'] = video_clip_json
     return video_paths
 
 

@@ -1,5 +1,6 @@
 import locale
 import os
+import re
 import traceback
 
 import requests
@@ -14,7 +15,7 @@ from datetime import datetime, timedelta
 
 from app.models import const
 from app.utils import check_script
-from app.services import material
+from app.services import material, video
 
 urllib3.disable_warnings()
 
@@ -493,8 +494,6 @@ def cut_video(params, progress_callback=None):
             if progress_callback:
                 progress_callback(progress)
 
-        # todo 获取视频素材：本地 or 网络资源
-
         subclip_videos = material.clip_videos(
             task_id=task_id,
             timestamp_terms=time_list,
@@ -637,3 +636,52 @@ def init_imagemagick():
     except Exception as e:
         logger.error(f"初始化 ImageMagick 失败: {str(e)}")
         return False
+
+def get_video_materials(params):
+    task_id = str(uuid4())
+    # progress_bar = st.progress(0)
+    # status_text = st.empty()
+    #
+    # def update_progress(progress: float, message: str = ""):
+    #     progress_bar.progress(progress)
+    #     if message:
+    #         status_text.text(f"{progress}% - {message}")
+    #     else:
+    #         status_text.text(f"进度: {progress}%")
+
+    if "pexels" == params.video_source or "pixabay" == params.video_source:
+        logger.info(f"\n\n## downloading videos from {params.video_source}")
+        downloaded_videos = material.download_videos(
+            task_id=task_id,
+            search_terms=[term.strip() for term in re.split(r"[,，]", st.session_state.get('video_theme', ''))],
+            source=params.video_source,
+            video_aspect=params.video_aspect,
+            video_contact_mode=params.video_concat_mode,
+            audio_duration=params.expect_video_duration * params.video_count,
+            max_clip_duration=params.video_clip_duration,
+        )
+        if not downloaded_videos:
+            # progress_callback(1)
+            logger.error(
+                "failed to download videos, maybe the network is not available. if you are in China, please use a VPN."
+            )
+            return None
+        st.session_state['video_origin_path'] = downloaded_videos
+        params.video_origin_path = downloaded_videos
+        return downloaded_videos
+    else:
+        logger.info("\n\n## preprocess local materials")
+        materials = video.preprocess_video(
+            materials=params.video_origin_path, clip_duration=params.video_clip_duration
+        )
+        if not materials:
+            # progress_callback(1)
+            logger.error(
+                "no valid materials found, please check the materials and try again."
+            )
+            return None
+        st.session_state['video_origin_path'] = materials
+        params.video_origin_path = materials
+        return materials
+
+
