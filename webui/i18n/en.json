@@ -104,6 +104,10 @@
     "Video Split": "**Video Split**",
     "Split Video File": "Video File (:blue[1️⃣Supports uploading video files (limit 2G) 2️⃣For large files, it is recommended to directly import them into the ./storage/temp/split directory])",
     "One-Click Transcribe OST": "One-Click Transcribe OST",
-    "Transcribing OST...": "Transcribing OST..."
+    "Transcribing OST...": "Transcribing OST...",
+    "Use Source TTS Audio": "Use Source TTS Audio",
+    "Custom TTS Audio": "Custom TTS Audio",
+    "TTS Audio": "TTS Audio",
+    "Custom TTS Audio File": "Please enter the file path of the custom tts audio"
   }
 }

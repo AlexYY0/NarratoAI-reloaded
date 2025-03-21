@@ -278,7 +278,6 @@ def download_videos(
                         "narration": "",
                         "timestamp": f"{format_timestamp(start_time)}-{format_timestamp(end_time)}",
                         "picture": "None",
-                        "duration": end_time - start_time
                     })
                     start_time = end_time
                     if video_contact_mode.value == VideoConcatMode.sequential.value:
@@ -303,7 +302,13 @@ def download_videos(
     for j in src_video_clip_json:
         if current_time >= audio_duration:
             break
-        duration = j.pop('duration')
+        start_str, end_str = j["timestamp"].split('-')
+        start_seconds = time_to_seconds(start_str)
+        end_seconds = time_to_seconds(end_str)
+        duration = end_seconds - start_seconds
+        if (current_time + duration) > audio_duration:
+            duration = audio_duration - current_time
+            j['timestamp'] = f"{start_str}-{format_timestamp(start_seconds + duration)}"
         j['new_timestamp'] = f"{format_timestamp(current_time)}-{format_timestamp(current_time + duration)}"
         video_clip_json.append(j)
         # 更新当前时间点

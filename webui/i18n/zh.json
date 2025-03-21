@@ -207,6 +207,10 @@
     "Video Split": "**分解视频**",
     "Split Video File": "视频文件（:blue[1️⃣支持上传视频文件(限制2G) 2️⃣大文件建议直接导入 ./storage/temp/split 目录]）",
     "One-Click Transcribe OST": "一键转录原声",
-    "Transcribing OST...": "正在转录原声中..."
+    "Transcribing OST...": "正在转录原声中...",
+    "Use Source TTS Audio": "使用原生TTS语音",
+    "Custom TTS Audio": "自定义TTS语音文件",
+    "TTS Audio": "TTS语音配置",
+    "Custom TTS Audio File": "请输入自定义背景音乐的文件路径"
   }
 }

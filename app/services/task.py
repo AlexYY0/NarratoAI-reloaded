@@ -238,6 +238,14 @@ def start_subclip(task_id: str, params: VideoClipParams, subclip_path_videos: di
             except Exception as e:
                 logger.error(f"合并音频文件失败: {str(e)}")
                 final_audio = ""
+    elif params.tts_audio_type or params.tts_audio_file:  # 自定义TTS语音文件
+        try:
+            if params.tts_audio_file and os.path.exists(params.tts_audio_file):
+                final_audio = params.tts_audio_file
+                logger.info(f"使用自定义TTS语音文件: {final_audio}")
+        except Exception as e:
+            logger.error(f"获取自定义TTS语音文件失败: {str(e)}")
+            final_audio = ""
     else:
         # 如果没有需要生成TTS的片段，创建一个空白音频文件
         # 这样可以确保后续的音频处理能正确进行

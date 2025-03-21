@@ -87,6 +87,30 @@ def render_tts_settings(tr):
     # 试听按钮
     render_voice_preview(tr, voice_name)
 
+    # 添加自定义TTS语音文件的支持
+    # TTS语音选项
+    tts_audio_options = [
+        (tr("Use Source TTS Audio"), ""),
+        (tr("Custom TTS Audio"), "custom"),
+    ]
+
+    selected_index = st.selectbox(
+        tr("TTS Audio"),
+        index=0,
+        options=range(len(tts_audio_options)),
+        format_func=lambda x: tts_audio_options[x][0],
+    )
+
+    # 获取选择的TTS语音类型
+    tts_audio_type = tts_audio_options[selected_index][1]
+    st.session_state['tts_audio_type'] = tts_audio_type
+
+    # 自定义TTS语音文件处理
+    if tts_audio_type == "custom":
+        custom_tts_audio_file = st.text_input(tr("Custom TTS Audio File"))
+        if custom_tts_audio_file and os.path.exists(custom_tts_audio_file):
+            st.session_state['tts_audio_file'] = custom_tts_audio_file
+
 
 def render_azure_v2_settings(tr):
     """渲染Azure V2语音设置"""
@@ -224,4 +248,6 @@ def get_audio_params():
         'bgm_type': st.session_state.get('bgm_type', 'random'),
         'bgm_file': st.session_state.get('bgm_file', ''),
         'bgm_volume': st.session_state.get('bgm_volume', 0.3),
+        'tts_audio_type': st.session_state.get('tts_audio_type', ''),
+        'tts_audio_file': st.session_state.get('tts_audio_file', ''),
     }

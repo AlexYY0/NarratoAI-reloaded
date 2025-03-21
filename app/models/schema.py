@@ -364,6 +364,9 @@ class VideoClipParams(BaseModel):
     bgm_type: Optional[str] = Field(default="random", description="背景音乐类型")
     bgm_file: Optional[str] = Field(default="", description="背景音乐文件")
 
+    tts_audio_type: Optional[str] = Field(default="", description="TTS语音类型")
+    tts_audio_file: Optional[str] = Field(default="", description="自定义TTS语音文件")
+
     subtitle_enabled: bool = True
     font_name: str = "SimHei"  # 默认使用黑体
     font_size: int = 36
