@@ -204,6 +204,9 @@
     "SlideOut": "滑动出",
     "Expect Video Duration": "期望视频时长/s (与自定义提示词二选一，自定义提示词即是视频文案，该选项是网络资源独有)",
     "Generate Online File Video Script": "网络文件脚本生成",
-    "Video Source": "视频来源"
+    "Video Split": "**分解视频**",
+    "Split Video File": "视频文件（:blue[1️⃣支持上传视频文件(限制2G) 2️⃣大文件建议直接导入 ./storage/temp/split 目录]）",
+    "One-Click Transcribe OST": "一键转录原声",
+    "Transcribing OST...": "正在转录原声中..."
   }
 }

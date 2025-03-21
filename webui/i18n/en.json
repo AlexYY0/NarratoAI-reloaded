@@ -101,6 +101,9 @@
     "SlideOut": "SlideOut",
     "Expect Video Duration": "Expect Video Duration",
     "Generate Online File Video Script": "Generate Online File Video Script",
-    "Video Source": "Video Source"
+    "Video Split": "**Video Split**",
+    "Split Video File": "Video File (:blue[1️⃣Supports uploading video files (limit 2G) 2️⃣For large files, it is recommended to directly import them into the ./storage/temp/split directory])",
+    "One-Click Transcribe OST": "One-Click Transcribe OST",
+    "Transcribing OST...": "Transcribing OST..."
   }
 }
